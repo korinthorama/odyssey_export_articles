@@ -1,0 +1,106 @@
+body {
+    background: #191919;
+    color: silver;
+    border: none;
+    padding: 0;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 15px;
+}
+
+#container {
+    max-width: 800px;
+    margin: 40px auto;
+}
+
+h1 {
+    font-family: 'Roboto Condensed', sans-serif;
+    color: #b338b1;
+    margin-bottom: 50px;
+}
+
+.centered {
+    text-align: center;
+}
+
+.btn {
+    display: inline-block;
+    text-align: center;
+    padding: 6px 20px;
+    margin: 2px;
+    text-decoration: none;
+    background-color: #770076;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #940093;
+}
+
+.btn_submit {
+    margin: 20px 0;
+}
+
+.cms {
+    font-weight: bold;
+    color: #fff;
+    font-size: 18px;
+    padding: 0 10px;
+}
+
+form {
+    display: table;
+    margin: auto;
+    min-width: 300px;
+}
+
+.form_element {
+    clear: both;
+}
+
+.form_label {
+    margin: 10px 0 2px 0;
+    color: #bebebe;
+    font-size: .85em;
+    font-style: italic;
+    font-weight: bold;
+}
+
+.form_sublabel {
+    color: #7b8168;
+    font-style: italic;
+    font-weight: normal;
+    font-size: 12px;
+}
+
+.normal_wrapper {
+    position: relative;
+}
+
+.form_element input[type="text"], .form_element select {
+    width: 99%;
+    max-width: 500px;
+}
+
+.listbox[type="text"] {
+    padding: 4px;
+}
+
+.listbox {
+    color: #000;
+    background: #f7f7f7;
+    padding: 3px;
+    border: 1px solid #808080;
+}
+
+input, textarea, select, button {
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.checkbox_wrapper input {
+    display: block !important;
+    float: left !important;
+    margin: 3px 5px 0 0 !important;
+}
