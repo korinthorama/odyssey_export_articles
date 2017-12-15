@@ -2,7 +2,7 @@
 require("dll.php");
 set_time_limit(0); // no time out for this script
 $cms = detect_cms();
-if (!is_dir($zip_folder)) $messages->addError("Zip folder is missing!");
+if (!is_dir($zip_folder)) @mkdir($zip_folder);
 if (!is_writable($zip_folder)) $messages->addError("Zip folder is not writable!");
 ?>
 <!DOCTYPE HTML>
