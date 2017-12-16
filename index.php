@@ -7,7 +7,7 @@ if (!is_writable($zip_folder)) $messages->addError("Zip folder is not writable!"
 if ($_POST['action'] != 'Export') {
     ?>
     <!DOCTYPE HTML>
-    <html lang="el">
+    <html lang="en-US">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <title>Export content to Odyssey CMS</title>
