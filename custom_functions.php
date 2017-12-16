@@ -57,7 +57,7 @@ function export($cms) {
                 $external_images = json_decode($record->images);
                 $data = extract_data($cms, $article_content['body'], $external_images);
                 $record->introtext = $article_content['minitext'];
-                $record->fulltext = $data['html'];
+                $record->fulltext = html_entity_decode($data['html'], ENT_NOQUOTES | ENT_HTML5, 'UTF-8');
                 $record->created = getTimestamp($record->created);
                 $record->access = ($record->access <> 6) ? 1 : 0;
                 $catID = $record->catid;
@@ -89,8 +89,8 @@ function export($cms) {
                     }
                 }
                 $line[] = json_encode($images);
+                $csv[] = $line;
             }
-            $csv[] = $line;
             $csvFile = $zip_folder . 'articles.csv';
             $fp = fopen($csvFile, 'w');
             foreach ($csv as $fields) fputcsv($fp, $fields, $delimiter, $enclosure);
@@ -146,8 +146,16 @@ function extract_data($cms, $html, $external_images) {
     switch ($cms) {
         case "joomla":
             $images = $meta = array();
-            $dom = new DOMDocument('1.0', 'UTF-8');
-            $dom->loadHTML($html, LIBXML_HTML_NODEFDTD | LIBXML_NOBLANKS);
+            $dom = new DOMDocument();
+            $dom->encoding = 'UTF-8';
+            libxml_use_internal_errors(true);
+            // load HTML with hack
+            $dom->loadHTML('<?xml encoding="UTF-8">' . $html);
+            foreach ($dom->childNodes as $item) {
+                if ($item->nodeType == XML_PI_NODE) {
+                    $dom->removeChild($item);// remove hack
+                }
+            }
             $tags = $dom->getElementsByTagName('hr');
             foreach ($tags as $key => $tag) {
                 $node = $tags->item($key);
@@ -196,7 +204,11 @@ function extract_data($cms, $html, $external_images) {
             $secondary_image_description = ($default_image_type == "image_intro") ? $external_images->image_fulltext_caption : $external_images->image_intro_caption;
             $images[] = array('src' => $default_image, 'type' => 'mediabank_image', 'default' => '1', 'title' => $default_image_title, 'description' => $default_image_description);
             if($include_image_intro) $images[] = array('src' => $secondary_image, 'type' => 'mediabank_image', 'default' => '0', 'title' => $secondary_image_title, 'description' => $secondary_image_description);
-            $html = str_replace(array('<html><body>', '</body></html>', '<p>&Acirc;&nbsp;</p>'), "", $dom->saveHTML());
+            $html = str_replace(array(
+                '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">',
+                '<html><body>',
+                '</body></html>'
+            ), "", $dom->saveHTML());
             break;
 
         case "wordpress":
@@ -309,6 +321,5 @@ function getZipError($code) {
             return 'An unknown error has occurred (' . intval($code) . ')';
     }
 }
-
 
 
