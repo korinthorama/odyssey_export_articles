@@ -7,8 +7,9 @@ function detect_cms() {
 }
 
 function export($cms) {
-    global $messages, $db, $db_prefix, $zip_folder, $zipFile;
+    global $messages, $db, $db_prefix, $zip_folder, $zipFile, $loading_file;
     emptyDirectory($zip_folder); // clean up before exporting new content
+    @unlink($loading_file);
     $delimiter = ',';
     $enclosure = '"';
     $csv = $header = $filesToZip = array();
@@ -48,6 +49,8 @@ function export($cms) {
                 $messages->addError("No Joomla articles found!");
                 return false;
             }
+            $counter = 0;
+            $articles_count = count($records);
             foreach ($records as $key => $record) {
                 $line = $images = array();
                 $introtext = $record->introtext;
@@ -80,34 +83,56 @@ function export($cms) {
                         $line[] = trim($categories[$catID]['title']);
                     }
                 }
-                foreach ($images as $item) {
-                    $source = "../" . $item['src'];
-                    if (is_file($source)) {
-                        $destination = $zip_folder . basename($item['src']);
-                        copy($source, $destination);
-                        $filesToZip[] = $destination;
+                global $export_type;
+                if($export_type == "full") { // text & images must be exported
+                    foreach ($images as $item) {
+                        $source = "../" . $item['src'];
+                        if (is_file($source)) {
+                            $destination = $zip_folder . basename($item['src']);
+                            copy($source, $destination);
+                            $filesToZip[] = $destination;
+                        }
                     }
                 }
                 $line[] = json_encode($images);
                 $csv[] = $line;
+                $counter++;
+                manage_loading($articles_count, $counter);
             }
             $csvFile = $zip_folder . 'articles.csv';
             $fp = fopen($csvFile, 'w');
-            foreach ($csv as $fields) fputcsv($fp, $fields, $delimiter, $enclosure);
+            foreach ($csv as $fields){
+                fputcsv($fp, $fields, $delimiter, $enclosure);
+                $counter ++;
+            }
             fclose($fp);
             $filesToZip[] = $csvFile;
             $zip_results = create_zip($filesToZip, $zipFile, false);
-            if($zip_results !== true){
+            if ($zip_results !== true) {
                 $zip_error = "Zip Error: " . getZipError($zip_results);
                 $messages->addError($zip_error, true);
             }
             emptyDirectory($zip_folder, true); // delete all files except the exported zip
+            @unlink($loading_file); // reset loading info
             return true;
             break;
 
         case "wordpress":
             // future use
             break;
+    }
+}
+
+function manage_loading($total, $counter) {
+    global $loading_file;
+    $loading_file = (preg_match('/^([-\.\w]+)$/', $loading_file) > 0) ? $loading_file : "loading.txt"; // safe filename
+    $loaded = file($loading_file);
+    $loaded = (int)$loaded[0];
+    $percent = (int)(100 * ($counter / $total));
+    if($percent > $loaded) {
+        $fp = fopen($loading_file, "w");
+        fwrite($fp, $percent);
+        fclose($fp);
     }
 }
 
@@ -195,15 +220,28 @@ function extract_data($cms, $html, $external_images) {
                     $node->setAttribute("src", "image=" . $img_id);
                 }
             }
-            global $default_image_type, $include_image_intro;
-            $default_image = ($default_image_type == "image_intro") ? $external_images->image_intro : $external_images->image_fulltext;
-            $default_image_title = ($default_image_type == "image_intro") ? $external_images->image_intro_caption : $external_images->image_fulltext_caption;
-            $default_image_description = ($default_image_type == "image_intro") ? $external_images->image_intro_caption : $external_images->image_fulltext_caption;
-            $secondary_image = ($default_image_type == "image_intro") ? $external_images->image_fulltext : $external_images->image_intro;
-            $secondary_image_title = ($default_image_type == "image_intro") ? $external_images->image_fulltext_caption : $external_images->image_intro_caption;
-            $secondary_image_description = ($default_image_type == "image_intro") ? $external_images->image_fulltext_caption : $external_images->image_intro_caption;
-            $images[] = array('src' => $default_image, 'type' => 'mediabank_image', 'default' => '1', 'title' => $default_image_title, 'description' => $default_image_description);
-            if($include_image_intro) $images[] = array('src' => $secondary_image, 'type' => 'mediabank_image', 'default' => '0', 'title' => $secondary_image_title, 'description' => $secondary_image_description);
+            global $export_type, $default_image_type;
+            if($export_type == "full") { // text & images must be exported
+                $default_image = ($default_image_type == "image_intro" && $external_images->image_intro) ?
+                    $external_images->image_intro : $external_images->image_fulltext;
+                $default_image_title = ($default_image_type == "image_intro" && $external_images->image_intro) ?
+                    $external_images->image_intro_caption : $external_images->image_fulltext_caption;
+                $default_image_description = ($default_image_type == "image_intro" && $external_images->image_intro) ?
+                    $external_images->image_intro_caption : $external_images->image_fulltext_caption;
+                $secondary_image = ($default_image_type == "image_intro" && $external_images->image_intro) ?
+                    $external_images->image_fulltext : $external_images->image_intro;
+                $secondary_image_title = ($default_image_type == "image_intro" && $external_images->image_intro) ?
+                    $external_images->image_fulltext_caption : $external_images->image_intro_caption;
+                $secondary_image_description = ($default_image_type == "image_intro" && $external_images->image_intro) ?
+                    $external_images->image_fulltext_caption : $external_images->image_intro_caption;
+                if($default_image){
+                    $images[] = array('src' => $default_image, 'type' => 'mediabank_image', 'default' => '1', 'title' => $default_image_title, 'description' => $default_image_description);
+                }
+                if($secondary_image) {
+                    $default_status = (empty($default_image)) ? '1' : '0';
+                    $images[] = array('src' => $secondary_image, 'type' => 'mediabank_image', 'default' => $default_status, 'title' => $secondary_image_title, 'description' => $secondary_image_description);
+                }
+            }
             $html = str_replace(array(
                 '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">',
                 '<html><body>',
@@ -229,8 +267,8 @@ function limit_text($text) {
 function emptyDirectory($dir, $exclude_zip) {
     $files = glob($dir . '*');
     foreach ($files as $file) {
-        if (is_file($file)){
-            if($exclude_zip && pathinfo($file, PATHINFO_EXTENSION) == "zip") continue; // skip zip file
+        if (is_file($file)) {
+            if ($exclude_zip && pathinfo($file, PATHINFO_EXTENSION) == "zip") continue; // skip zip file
             unlink($file);
         }
     }

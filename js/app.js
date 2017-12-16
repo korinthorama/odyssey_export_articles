@@ -2,16 +2,82 @@ $().ready(function () {
     $('.numeric').on('keypress', function (event) {
         return onlyNumeric(this, event, true, false);
     });
-    $('#default_image_type').on('change', function () {
-        if ($(this).val() == 'image_intro') $('#include_image_intro').prop('checked', true);
-    }).trigger('change');
-    $('#include_image_intro').on('change', function () {
-        if ($('#default_image_type').val() == 'image_intro'){
-            if($(this).prop('checked') == false){
-                alert('Image Intro must be exported\nbecause is set to be the default one!');
-                $(this).prop('checked', true);
-            }
+    $('.export_type').on('change', function(){
+        var rule = ($(this).val() == 'full') ? 'block' : 'none';
+        $('#img_options').css("display", rule);
+    });
+    $('#export_form').on('submit', function (event) {
+        event.preventDefault();
+        var form_data = $(this).serialize();
+        $('#header_msg').html($('#header_msg').attr('data-msg'));
+        $('#form_content').hide();
+        if (typeof(EventSource) !== 'undefined') {
+            // manage loading indicator with server send events
+            $('#loading').show();
+            setTimeout(function () {
+                var source = new EventSource('loading.php');
+                source.onmessage = function (event) {
+                    if (event.data != 'stop') {
+                        bar.animate(event.data / 100);  // Number from 0.0 to 1.0
+                        //console.log(event.data);
+                    }
 
+                    if (event.data == 100){
+                        event.target.close();
+                        setTimeout(function() {
+                            $('#loading').hide();
+                            $('#static_loading').show();
+                        }, 1000);
+                    }
+                };
+            }, 1000);
+        } else {
+            // show static loading message
+            $('#static_loading').show();
+        }
+        jQuery.ajax({
+            type: "POST",
+            url: "index.php",
+            data: form_data + "&action=Export",
+            async: true,
+            success: function (response) {
+                $('body').html(response);
+                // var newDoc = document.open("text/html", "replace");
+                // newDoc.write(response);
+                // //newDoc.reload();
+                // newDoc.close();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                alert("error: " + textStatus);
+                alert("errorThrown: " + errorThrown);
+            }
+        });
+    });
+
+    bar = new ProgressBar.Line('#loading', {
+        strokeWidth: 4,
+        easing: 'easeInOut',
+        duration: 1400,
+        color: '#b338b1',
+        trailColor: '#420241',
+        trailWidth: 1,
+        svgStyle: {width: '100%', height: '100%'},
+        text: {
+            style: {
+                // Text color.
+                // Default: same as stroke color (options.color)
+                color: '#999',
+                position: 'absolute',
+                right: '0',
+                top: '30px',
+                padding: 0,
+                margin: 0,
+                transform: null
+            },
+            autoStyleContainer: false
+        },
+        step: function (state, bar) {
+            bar.setText('Scanning content: ' +  Math.round(bar.value() * 100) + ' %');
         }
     });
 });
