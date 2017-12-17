@@ -14,15 +14,15 @@ function export($cms) {
     $enclosure = '"';
     $csv = $header = $filesToZip = array();
     $simple_fields = array('title', 'introtext', 'fulltext', 'created', 'state', 'featured', 'access');
-    $header['title'] = "Title";
-    $header['introtext'] = "Minitext";
-    $header['fulltext'] = "Body";
-    $header['category'] = "Category";
-    $header['created'] = "Published Date";
-    $header['state'] = "Active";
-    $header['featured'] = "Featured";
-    $header['access'] = "Access";
-    $header['images'] = "Images";
+    $header['title'] = "Τίτλος";
+    $header['introtext'] = "Συνοπτική περιγραφή";
+    $header['fulltext'] = "Περιεχόμενο του άρθρου";
+    $header['category'] = "Κατηγορία δημοσίευσης";
+    $header['created'] = "Ημερομηνία δημοσίευσης";
+    $header['state'] = "Δημοσιευμένο";
+    $header['featured'] = "Με χαρακτηριστική προβολή";
+    $header['access'] = "Επίπεδο πρόσβασης";
+    $header['images'] = "Εικόνες";
     $csv[] = $header;
     switch ($cms) {
         case "joomla":
