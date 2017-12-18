@@ -202,7 +202,7 @@ function extract_data($cms, $html, $external_images) {
                         $category_id = get_category_id('joomla', $menu_id);
                         $category_name = get_category_name('joomla', $category_id);
                         if ($category_name) { // if a valid category name has been extracted
-                            $href = "http://odyssey.cms?name=" . base64_encode($category_name);
+                            $href = "http://odyssey.cms?category=" . base64_encode($category_name);
                             $node->setAttribute("href", $href);
                         }
                     }
@@ -210,7 +210,7 @@ function extract_data($cms, $html, $external_images) {
                         parse_str($href, $href_data);
                         $article_id = $href_data["id"];
                         $article_name = get_article_name('joomla', $article_id);
-                        $href = "http://odyssey.cms?name=" . base64_encode($article_name);
+                        $href = "http://odyssey.cms?article=" . base64_encode($article_name);
                         $node->setAttribute("href", $href);
                     }
                 }
