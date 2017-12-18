@@ -200,11 +200,9 @@ function extract_data($cms, $html, $external_images) {
                         parse_str($href, $href_data);
                         $menu_id = $href_data["index_php?Itemid"]; // get category id from menu_id
                         $category_id = get_category_id('joomla', $menu_id);
-                        debug($category_id);
                         $category_name = get_category_name('joomla', $category_id);
-                        debug($category_name);
                         if ($category_name) { // if a valid category name has been extracted
-                            $href = "category=" . base64_encode($category_name);
+                            $href = "http://odyssey.cms?name=" . base64_encode($category_name);
                             $node->setAttribute("href", $href);
                         }
                     }
@@ -212,7 +210,7 @@ function extract_data($cms, $html, $external_images) {
                         parse_str($href, $href_data);
                         $article_id = $href_data["id"];
                         $article_name = get_article_name('joomla', $article_id);
-                        $href = "article=" . base64_encode($article_name);
+                        $href = "http://odyssey.cms?name=" . base64_encode($article_name);
                         $node->setAttribute("href", $href);
                     }
                 }
@@ -231,7 +229,7 @@ function extract_data($cms, $html, $external_images) {
                         'description' => $node->getAttribute('alt'),
                         'img_id' => $img_id
                     );
-                    $node->setAttribute("src", "image=" . $img_id);
+                    $node->setAttribute("src", "http://odyssey.cms?image=" . $img_id);
                 }
             }
             global $export_type, $default_image_type;
