@@ -42,10 +42,6 @@ $().ready(function () {
             async: true,
             success: function (response) {
                 $('body').html(response);
-                // var newDoc = document.open("text/html", "replace");
-                // newDoc.write(response);
-                // //newDoc.reload();
-                // newDoc.close();
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 alert("error: " + textStatus);
