@@ -216,7 +216,14 @@ function extract_data($cms, $html, $external_images) {
                 $src = $node->getAttribute('src');
                 if (!preg_match('/^http/', $src)) { // its a local image
                     $img_id = uniqid();
-                    $images[] = array('src' => $src, 'type' => 'body_image', 'default' => '0', 'title' => $node->getAttribute('title'), 'description' => $node->getAttribute('alt'));
+                    $images[] = array(
+                        'src' => $src,
+                        'type' => 'body_image',
+                        'default' => '0',
+                        'title' => $node->getAttribute('title'),
+                        'description' => $node->getAttribute('alt'),
+                        'img_id' => $img_id
+                    );
                     $node->setAttribute("src", "image=" . $img_id);
                 }
             }
