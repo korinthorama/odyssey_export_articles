@@ -27,7 +27,7 @@ function export($cms) {
     switch ($cms) {
         case "joomla":
             $categories = $images = array();
-            // categories
+            // get categories
             $table = $db_prefix . 'categories';
             $records = $db->getRecords('select * from `' . $table . '` where `extension`="com_content"');
             if (!$records) {
@@ -42,7 +42,7 @@ function export($cms) {
                 $category['image'] = $category_image;
                 $categories[$record->id] = $category;
             }
-            // articles
+            // get articles
             $table = $db_prefix . 'content';
             $records = $db->getRecords('select * from `' . $table . '`');
             if (!$records) {
@@ -84,7 +84,7 @@ function export($cms) {
                     }
                 }
                 global $export_type;
-                if($export_type == "full") { // text & images must be exported
+                if ($export_type == "full") { // text & images must be exported
                     foreach ($images as $item) {
                         $source = "../" . $item['src'];
                         if (is_file($source)) {
@@ -101,9 +101,9 @@ function export($cms) {
             }
             $csvFile = $zip_folder . 'articles.csv';
             $fp = fopen($csvFile, 'w');
-            foreach ($csv as $fields){
+            foreach ($csv as $fields) {
                 fputcsv($fp, $fields, $delimiter, $enclosure);
-                $counter ++;
+                $counter++;
             }
             fclose($fp);
             $filesToZip[] = $csvFile;
@@ -129,7 +129,7 @@ function manage_loading($total, $counter) {
     $loaded = file($loading_file);
     $loaded = (int)$loaded[0];
     $percent = (int)(100 * ($counter / $total));
-    if($percent > $loaded) {
+    if ($percent > $loaded) {
         $fp = fopen($loading_file, "w");
         fwrite($fp, $percent);
         fclose($fp);
@@ -199,16 +199,20 @@ function extract_data($cms, $html, $external_images) {
                     if (preg_match('/^index.php\?Itemid=/', $href)) { //  its a menu link, a category link must be set
                         parse_str($href, $href_data);
                         $menu_id = $href_data["index_php?Itemid"]; // get category id from menu_id
-                        $cat_id = get_cat_id($menu_id);
-                        if($cat_id) { // if a valid category id has been extracted
-                            $href = "category=" . $cat_id;
+                        $category_id = get_category_id('joomla', $menu_id);
+                        debug($category_id);
+                        $category_name = get_category_name('joomla', $category_id);
+                        debug($category_name);
+                        if ($category_name) { // if a valid category name has been extracted
+                            $href = "category=" . base64_encode($category_name);
                             $node->setAttribute("href", $href);
                         }
                     }
                     if (preg_match('/^index.php\?option=com_content&view=article&id=/', $href)) { // set article link
                         parse_str($href, $href_data);
                         $article_id = $href_data["id"];
-                        $href = "article=" . $article_id;
+                        $article_name = get_article_name('joomla', $article_id);
+                        $href = "article=" . base64_encode($article_name);
                         $node->setAttribute("href", $href);
                     }
                 }
@@ -231,7 +235,7 @@ function extract_data($cms, $html, $external_images) {
                 }
             }
             global $export_type, $default_image_type;
-            if($export_type == "full") { // text & images must be exported
+            if ($export_type == "full") { // text & images must be exported
                 $default_image = ($default_image_type == "image_intro" && $external_images->image_intro) ?
                     $external_images->image_intro : $external_images->image_fulltext;
                 $default_image_title = ($default_image_type == "image_intro" && $external_images->image_intro) ?
@@ -244,10 +248,10 @@ function extract_data($cms, $html, $external_images) {
                     $external_images->image_fulltext_caption : $external_images->image_intro_caption;
                 $secondary_image_description = ($default_image_type == "image_intro" && $external_images->image_intro) ?
                     $external_images->image_fulltext_caption : $external_images->image_intro_caption;
-                if($default_image){
+                if ($default_image) {
                     $images[] = array('src' => $default_image, 'type' => 'mediabank_image', 'default' => '1', 'title' => $default_image_title, 'description' => $default_image_description);
                 }
-                if($secondary_image) {
+                if ($secondary_image) {
                     $default_status = (empty($default_image)) ? '1' : '0';
                     $images[] = array('src' => $secondary_image, 'type' => 'mediabank_image', 'default' => $default_status, 'title' => $secondary_image_title, 'description' => $secondary_image_description);
                 }
@@ -266,15 +270,57 @@ function extract_data($cms, $html, $external_images) {
     return array("html" => $html, "images" => $images, "meta" => $meta);
 }
 
-function get_cat_id($menu_id){
-    global $db, $db_prefix;
-    $table = $db_prefix . "menu";
-    $q = "select `link` from `$table` where `id`='$menu_id'";
-    $link = $db->getRecord($q)->link;
-    if(!$link) return false;
-    parse_str($link, $link_data);
-    $cat_id = $link_data["id"];
-    return ((int)$cat_id) ? (int)$cat_id : false; // safe returned value
+function get_category_id($cms, $menu_id) {
+    $category_id = false;
+    switch ($cms) {
+        case "joomla":
+            global $db, $db_prefix;
+            $table = $db_prefix . "menu";
+            $q = "select `link` from `$table` where `id`='$menu_id'";
+            $link = $db->getRecord($q)->link;
+            parse_str($link, $link_data);
+            $category_id = $link_data["id"];
+            break;
+
+        case "wordpress":
+            // future use
+            break;
+    }
+    return $category_id;
+}
+
+function get_article_name($cms, $id) {
+    $article_name = false;
+    switch ($cms) {
+        case "joomla":
+            global $db, $db_prefix;
+            $table = $db_prefix . "content";
+            $q = "select `title` from `$table` where `id`='$id'";
+            $article_name = $db->getRecord($q)->title;
+            break;
+
+        case "wordpress":
+            // future use
+            break;
+    }
+    return $article_name;
+}
+
+function get_category_name($cms, $id) {
+    $category_name = false;
+    switch ($cms) {
+        case "joomla":
+            global $db, $db_prefix;
+            $table = $db_prefix . "categories";
+            $q = "select `title` from `$table` where `id`='$id'";
+            $category_name = $db->getRecord($q)->title;
+            break;
+
+        case "wordpress":
+            // future use
+            break;
+    }
+    return $category_name;
 }
 
 function limit_text($text) {
