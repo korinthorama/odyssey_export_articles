@@ -196,11 +196,14 @@ function extract_data($cms, $html, $external_images) {
                 $node = $tags->item($key);
                 $href = $node->getAttribute('href');
                 if (!preg_match('/^http/', $href)) { // its a relative link
-                    if (preg_match('/^index.php\?Itemid=/', $href)) { //  set category link
+                    if (preg_match('/^index.php\?Itemid=/', $href)) { //  its a menu link, a category link must be set
                         parse_str($href, $href_data);
-                        $cat_id = $href_data["index_php?Itemid"];
-                        $href = "category=" . $cat_id;
-                        $node->setAttribute("href", $href);
+                        $menu_id = $href_data["index_php?Itemid"]; // get category id from menu_id
+                        $cat_id = get_cat_id($menu_id);
+                        if($cat_id) { // if a valid category id has been extracted
+                            $href = "category=" . $cat_id;
+                            $node->setAttribute("href", $href);
+                        }
                     }
                     if (preg_match('/^index.php\?option=com_content&view=article&id=/', $href)) { // set article link
                         parse_str($href, $href_data);
@@ -261,6 +264,17 @@ function extract_data($cms, $html, $external_images) {
             break;
     }
     return array("html" => $html, "images" => $images, "meta" => $meta);
+}
+
+function get_cat_id($menu_id){
+    global $db, $db_prefix;
+    $table = $db_prefix . "menu";
+    $q = "select `link` from `$table` where `id`='$menu_id'";
+    $link = $db->getRecord($q)->link;
+    if(!$link) return false;
+    parse_str($link, $link_data);
+    $cat_id = $link_data["id"];
+    return ((int)$cat_id) ? (int)$cat_id : false; // safe returned value
 }
 
 function limit_text($text) {
