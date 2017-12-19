@@ -1,5 +1,7 @@
 # Export Joomla content to Odyssey CMS  
 
+This application will atempt to export the content of a Joomla CMS, in a valid format for importing to Odyssey CMS
+
 -- Instructions --  
 Unpack  
 Update the config/config.php with your credentials  
