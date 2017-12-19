@@ -35,6 +35,7 @@ if ($_POST['action'] != 'Export') {
                     $max_chars = (int)$_POST['max_chars'];
                     $default_image_type = $_POST['default_image_type'];
                     $export_type = $_POST['export_type'];
+                    require_once($cms . ".php");
                     export($cms);
                 }
                 break;
