@@ -230,6 +230,7 @@ function extract_data($html, $external_images) {
 function get_category_id($menu_id) {
     global $db, $db_prefix;
     $table = $db_prefix . "menu";
+    $menu_id = (int)$menu_id; // sanitize
     $q = "select `link` from `$table` where `id`='$menu_id'";
     $link = $db->getRecord($q)->link;
     parse_str($link, $link_data);
@@ -240,6 +241,7 @@ function get_category_id($menu_id) {
 function get_article_name($id) {
     global $db, $db_prefix;
     $table = $db_prefix . "content";
+    $id = (int)$id; // sanitize
     $q = "select `title` from `$table` where `id`='$id'";
     $article_name = $db->getRecord($q)->title;
     return $article_name;
@@ -248,6 +250,7 @@ function get_article_name($id) {
 function get_category_name($id) {
     global $db, $db_prefix;
     $table = $db_prefix . "categories";
+    $id = (int)$id; // sanitize
     $q = "select `title` from `$table` where `id`='$id'";
     $category_name = $db->getRecord($q)->title;
     return $category_name;
