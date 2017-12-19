@@ -54,7 +54,7 @@ function export() {
         $record->introtext = $article_content['minitext'];
         $record->fulltext = html_entity_decode($data['html'], ENT_NOQUOTES | ENT_HTML5, 'UTF-8');
         $record->created = getTimestamp($record->created);
-        $record->access = ($record->access <> 6) ? 1 : 0;
+        $record->access = ($record->access <> '1') ? '0' : '1';
         $catID = $record->catid;
         $images = $data['images'];
         foreach ($header as $key => $val) {
