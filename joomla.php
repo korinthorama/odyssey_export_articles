@@ -6,7 +6,7 @@ function export() {
     @unlink($loading_file);
     $delimiter = ',';
     $enclosure = '"';
-    $csv = $header = $filesToZip = array();
+    $csv = $category = $header = $filesToZip = array();
     $simple_fields = array('title', 'introtext', 'fulltext', 'created', 'state', 'featured', 'access');
     $header['title'] = "Τίτλος";
     $header['introtext'] = "Συνοπτική περιγραφή";
@@ -86,7 +86,7 @@ function export() {
                 }
             }
         }
-        $line[] = json_encode($images);
+        $line[] = json_encode($images, JSON_UNESCAPED_UNICODE);
         $csv[] = $line;
         $counter++;
         manage_loading($articles_count, $counter);
