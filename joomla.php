@@ -36,7 +36,7 @@ function export() {
     }
     // get articles
     $table = $db_prefix . 'content';
-    $records = $db->getRecords('select * from `' . $table . '`');
+    $records = $db->getRecords('select * from `' . $table . '` where `state` <> -2');
     if (!$records) {
         $messages->addError("No Joomla articles found!");
         return false;
@@ -167,7 +167,7 @@ function extract_data($html, $external_images) {
                 $category_id = get_category_id($menu_id);
                 $category_name = get_category_name($category_id);
                 if ($category_name) { // if a valid category name has been extracted
-                    $href = "http://odyssey.cms?category=" . base64_encode($category_name);
+                    $href = "http://odyssey.cms?category=" . urlencode($category_name);
                     $node->setAttribute("href", $href);
                 }
             }
@@ -175,8 +175,22 @@ function extract_data($html, $external_images) {
                 parse_str($href, $href_data);
                 $article_id = $href_data["id"];
                 $article_name = get_article_name($article_id);
-                $href = "http://odyssey.cms?article=" . base64_encode($article_name);
-                $node->setAttribute("href", $href);
+                if ($article_name) { // if a valid article name has been extracted
+                    $href = "http://odyssey.cms?article=" . urlencode($article_name);
+                    $node->setAttribute("href", $href);
+                }
+            }
+            if (preg_match('/^images\//', $href)) { // its other file for mediabank
+                $img_id = uniqid();
+                $images[] = array(
+                    'src' => $href,
+                    'type' => 'file',
+                    'default' => '0',
+                    'title' => $node->textContent,
+                    'description' => '',
+                    'img_id' => $img_id
+                );
+                $node->setAttribute("href", "http://odyssey.cms?file=" . $img_id);
             }
         }
     }
