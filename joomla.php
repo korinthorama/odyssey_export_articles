@@ -76,7 +76,7 @@ function export() {
             }
         }
         global $export_type;
-        if ($export_type == "full") { // text, images and files must be exported   
+        if ($export_type == "full") { // text, images and files must be exported
             foreach ($images as $item) {
                 $source = "../" . $item['src'];
                 if (is_file($source)) {
