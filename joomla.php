@@ -163,7 +163,7 @@ function extract_data($html, $external_images) {
         if (!preg_match('/^http/', $href)) { // its a relative link
             if (preg_match('/^index.php\?Itemid=/', $href)) { //  its a menu link, a category link must be set
                 parse_str($href, $href_data);
-                $menu_id = $href_data["index_php?Itemid"]; // get category id from menu_id
+                $menu_id = $href_data[array_keys($href_data)[0]]; // get category id from menu_id
                 $category_id = get_category_id($menu_id);
                 $category_name = get_category_name($category_id);
                 if ($category_name) { // if a valid category name has been extracted
@@ -191,6 +191,40 @@ function extract_data($html, $external_images) {
                     'img_id' => $img_id
                 );
                 $node->setAttribute("href", "http://odyssey.cms?file=" . $img_id);
+            }
+        }else{ // scan for video links
+            if (preg_match('/youtube\.com\/watch\?v=([^\&\?\/]+)/', $href, $result) ||
+                preg_match('/youtube\.com\/embed\/([^\&\?\/]+)/', $href, $result) ||
+                preg_match('/youtube\.com\/v\/([^\&\?\/]+)/', $href, $result) ||
+                preg_match('/youtu\.be\/([^\&\?\/]+)/', $href, $result)) {
+                $videoCode = $result[1];
+                if ($videoCode) {
+                    $provider = "youtube";
+                    $href = "http://odyssey.cms?video=" . $provider . "videocode" . urlencode($videoCode);
+                    $node->setAttribute("href", $href);
+                }
+            }
+            if (preg_match('/vimeo\.com/', $href)) {
+                list($videoCode, $null) = explode("?", $href);
+                list($videoCode,) = explode("_", $videoCode);
+                $temp = explode("/", $videoCode);
+                $videoCode = $temp[count($temp) - 1];
+                if ($videoCode) {
+                    $provider = "vimeo";
+                    $href = "http://odyssey.cms?video=" . $provider . "videocode" . urlencode($videoCode);
+                    $node->setAttribute("href", $href);
+                }
+            }
+            if (preg_match('/dailymotion\.com/', $href) || preg_match('/dai\.ly/', $href)) {
+                list($videoCode,) = explode("?", $href);
+                list($videoCode,) = explode("_", $videoCode);
+                $temp = explode("/", $videoCode);
+                $videoCode = $temp[count($temp) - 1];
+                if ($videoCode) {
+                    $provider = "dailymotion";
+                    $href = "http://odyssey.cms?video=" . $provider . "videocode" . urlencode($videoCode);
+                    $node->setAttribute("href", $href);
+                }
             }
         }
     }
