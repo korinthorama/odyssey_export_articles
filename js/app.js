@@ -11,30 +11,13 @@ $().ready(function () {
         var form_data = $(this).serialize();
         $('#header_msg').html($('#header_msg').attr('data-msg'));
         $('#form_content').hide();
-        if (typeof(EventSource) !== 'undefined') {
-            // manage loading indicator with server send events
+        bar.setText('Getting info...');
+        if (typeof(EventSource) !== 'undefined') { // if sse supported
             $('#loading').show();
-            setTimeout(function () {
-                var source = new EventSource('loading.php');
-                source.onmessage = function (event) {
-                    if (event.data != 'stop') {
-                        bar.animate(event.data / 100);  // Number from 0.0 to 1.0
-                        //console.log(event.data);
-                    }
-
-                    if (event.data == 100){
-                        event.target.close();
-                        setTimeout(function() {
-                            $('#loading').hide();
-                            $('#static_loading').show();
-                        }, 1000);
-                    }
-                };
-            }, 1000);
-        } else {
-            // show static loading message
+        } else { // show static loading message
             $('#static_loading').show();
         }
+        window.start_sse = true;
         jQuery.ajax({
             type: "POST",
             url: "index.php",
@@ -77,6 +60,43 @@ $().ready(function () {
         }
     });
 });
+
+function sse() { // manage loading indicator with server send events
+    if (typeof(EventSource) !== 'undefined') { // only if sse supported
+        source = new EventSource('loading.php');
+        var data;
+        source.onmessage = function (event) {
+            data = event.data.split('|');
+            percent = data[0];
+            // console.log('percent: ' + percent);
+            task = data[1];
+            if (!task) return false;
+            if (percent <= 100) {
+                bar.animate(percent / 100);  // Number from 0.0 to 1.0
+                if (task) {
+                    bar.setText(task + ': ' + Math.round(bar.value() * 100) + ' %');
+                } else {
+                    bar.setText("Getting info...");
+                }
+            }
+            if (percent > 99) { // all tasks completed, close the connection
+                source.close();
+                console.log('Server Sent Events stopped...');
+                $('#loading').hide();
+                $('#static_loading').show();
+            }
+        };
+    }
+}
+window.start_sse = false;
+window.iid = setInterval(function(){
+    if(window.start_sse){
+        sse(); // start server sent events on import
+        console.log('Server Sent Events started...');
+        clearInterval(window.iid);
+    }
+},1000);
+
 
 function onlyNumeric(elm, event, allowZero, integer) {
     var prev_value = $(elm).val();

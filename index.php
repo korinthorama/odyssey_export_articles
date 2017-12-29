@@ -4,6 +4,7 @@ set_time_limit(0); // no time out for this script
 $cms = detect_cms();
 if (!is_dir($zip_folder)) @mkdir($zip_folder);
 if (!is_writable($zip_folder)) $messages->addError("Zip folder is not writable!");
+
 if ($_POST['action'] != 'Export') {
     ?>
     <!DOCTYPE HTML>
@@ -105,6 +106,7 @@ if ($_POST['action'] != 'Export') {
                             break;
                     }
                     ?>
+                    <input name="sse" type="hidden" value="1">
                     <input type="submit" name="action" value="Export" class="btn btn_submit">
                 </div>
                 <div id="loading"></div>

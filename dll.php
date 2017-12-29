@@ -13,4 +13,5 @@ import("library.*", false); // load all Odyssey classes
 $messages = new messages();
 $db = new db();
 $db->query("SET NAMES 'utf8'");
+reset_loading();
 ?>

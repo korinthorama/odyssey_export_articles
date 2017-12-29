@@ -6,17 +6,25 @@ function detect_cms() {
     return false;
 }
 
-function manage_loading($total, $counter) {
+function manage_loading($task, $total, $counter) {
     global $loading_file;
     $loading_file = (preg_match('/^([-\.\w]+)$/', $loading_file) > 0) ? $loading_file : "loading.txt"; // safe filename
-    $loaded = file($loading_file);
-    $loaded = (int)$loaded[0];
+    $data = file($loading_file);
+    list($loaded,) = explode("|", $data[0]);
+    $loaded = (int)$loaded;
     $percent = (int)(100 * ($counter / $total));
     if ($percent > $loaded) {
         $fp = fopen($loading_file, "w");
-        fwrite($fp, $percent);
+        fwrite($fp, $percent . '|' . $task);
         fclose($fp);
     }
+}
+
+function reset_loading() {
+    global $loading_file;
+    $fp = fopen($loading_file, "w");
+    fwrite($fp, '');
+    fclose($fp);
 }
 
 function limit_text($text) {

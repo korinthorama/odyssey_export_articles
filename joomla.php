@@ -21,7 +21,7 @@ function export() {
     $categories = $images = array();
     // get categories
     $table = $db_prefix . 'categories';
-    $records = $db->getRecords('select * from `' . $table . '` where `extension`="com_content"');
+    $records = $db->getRecords('select * from `' . $table . '` where `published`="1"');
     if (!$records) {
         $messages->addError("No Joomla article categories found!");
         return false;
@@ -41,7 +41,7 @@ function export() {
         $messages->addError("No Joomla articles found!");
         return false;
     }
-    $counter = 0;
+    $loading_counter = 0;
     $articles_count = count($records);
     foreach ($records as $key => $record) {
         $line = $images = array();
@@ -55,6 +55,7 @@ function export() {
         $record->fulltext = html_entity_decode($data['html'], ENT_NOQUOTES | ENT_HTML5, 'UTF-8');
         $record->created = getTimestamp($record->created);
         $record->access = ($record->access <> '1') ? '0' : '1';
+        $record->featured = ($record->featured <> '1') ? '0' : '1';
         $catID = $record->catid;
         $images = $data['images'];
         foreach ($header as $key => $val) {
@@ -88,14 +89,13 @@ function export() {
         }
         $line[] = json_encode($images, JSON_UNESCAPED_UNICODE);
         $csv[] = $line;
-        $counter++;
-        manage_loading($articles_count, $counter);
+        $loading_counter++;
+        manage_loading('Scanning content', $articles_count, $loading_counter);
     }
     $csvFile = $zip_folder . 'articles.csv';
     $fp = fopen($csvFile, 'w');
     foreach ($csv as $fields) {
         fputcsv($fp, $fields, $delimiter, $enclosure);
-        $counter++;
     }
     fclose($fp);
     $filesToZip[] = $csvFile;
@@ -108,7 +108,6 @@ function export() {
     @unlink($loading_file); // reset loading info
     return true;
 }
-
 
 function get_article_content($introtext, $fulltext, $urls = array()) {
     $article_content = array("minitext" => "", "body" => "");
