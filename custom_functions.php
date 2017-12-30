@@ -28,6 +28,7 @@ function reset_loading() {
 }
 
 function limit_text($text) {
+    global $max_chars;
     if (empty($max_chars)) return $text; // no limitation
     $len = strlen($text);
     $text = unicode_substr($text, 0, $max_chars);
