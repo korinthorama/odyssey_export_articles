@@ -1,7 +1,7 @@
 <?php
 
 function export() {
-    global $messages, $db, $db_prefix, $zip_folder, $zipFile, $loading_file;
+    global $include_archived, $messages, $db, $db_prefix, $zip_folder, $zipFile, $loading_file;
     emptyDirectory($zip_folder); // clean up before exporting new content
     @unlink($loading_file);
     $delimiter = ',';
@@ -55,6 +55,11 @@ function export() {
         $record->fulltext = html_entity_decode($data['html'], ENT_NOQUOTES | ENT_HTML5, 'UTF-8');
         $record->created = getTimestamp($record->created);
         $record->access = ($record->access <> '1') ? '0' : '1';
+        if($include_archived == "1") {
+            $record->state = ($record->state == '1' || $record->state == '2') ? '1' : '0';
+        }else{
+            $record->state = ($record->state <> '1') ? '0' : '1';
+        }
         $record->featured = ($record->featured <> '1') ? '0' : '1';
         $catID = $record->catid;
         $images = $data['images'];
@@ -134,7 +139,7 @@ function get_article_content($introtext, $fulltext, $urls = array()) {
 }
 
 function extract_data($html, $external_images) {
-    $images = $meta = array();
+    $images = array();
     $dom = new DOMDocument();
     $dom->encoding = 'UTF-8';
     libxml_use_internal_errors(true);
@@ -271,7 +276,7 @@ function extract_data($html, $external_images) {
         '<html><body>',
         '</body></html>'
     ), "", $dom->saveHTML());
-    return array("html" => $html, "images" => $images, "meta" => $meta);
+    return array("html" => $html, "images" => $images);
 }
 
 function get_category_id($menu_id) {

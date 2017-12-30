@@ -36,6 +36,7 @@ if ($_POST['action'] != 'Export') {
                     $max_chars = (int)$_POST['max_chars'];
                     $default_image_type = $_POST['default_image_type'];
                     $export_type = $_POST['export_type'];
+                    $include_archived = $_POST['include_archived'];
                     require_once($cms . ".php");
                     export($cms);
                 }
@@ -97,6 +98,12 @@ if ($_POST['action'] != 'Export') {
                                             <option value="image_fulltext" selected="selected">Image Fulltext</option>
                                         </select>
                                     </div>
+                                </div>
+                            </div>
+                            <div class="form_element">
+                                <div class="checkbox_wrapper">
+                                    <input id="include_archived" name="include_archived" value="1" type="checkbox" checked="true">
+                                    <p class="form_label">Include Archived as active articles</p>
                                 </div>
                             </div>
                             <?php
