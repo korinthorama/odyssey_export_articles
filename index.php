@@ -58,34 +58,34 @@ if ($_POST['action'] != 'Export') {
             <p class="centered"><span id="header_msg" data-msg="Exporting <?php echo $content_type; ?>">Ready to export <?php echo $content_type; ?></span> from:<span class="cms"><?php echo ucfirst($cms); ?></span></p>
             <form action="index.php" method="post" id="export_form">
                 <div id="form_content">
+                    <fieldset>
+                        <legend>Type of export</legend>
+                        <div class="form_element">
+                            <div class="checkbox_wrapper">
+                                <input class="export_type" id="export_type_full" name="export_type" value="full" type="radio" checked="true">
+                                <p class="form_label">Text & Images</p>
+                            </div>
+                        </div>
+                        <div class="form_element">
+                            <div class="checkbox_wrapper">
+                                <input class="export_type" id="export_type_text" name="export_type" value="text" type="radio">
+                                <p class="form_label">Text Only</p>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <div class="form_element">
+                        <div class="form_label">
+                            Max characters for intro text :
+                            <div class="form_sublabel">(Leave empty to keep entire intro text)</div>
+                        </div>
+                        <div class="normal_wrapper">
+                            <input name="max_chars" id="max_chars" class="listbox numeric" type="text">
+                        </div>
+                    </div>
                     <?php
                     switch ($cms) {
                         case "joomla":
                             ?>
-                            <fieldset>
-                                <legend>Type of export</legend>
-                                <div class="form_element">
-                                    <div class="checkbox_wrapper">
-                                        <input class="export_type" id="export_type_full" name="export_type" value="full" type="radio" checked="true">
-                                        <p class="form_label">Text & Images</p>
-                                    </div>
-                                </div>
-                                <div class="form_element">
-                                    <div class="checkbox_wrapper">
-                                        <input class="export_type" id="export_type_text" name="export_type" value="text" type="radio">
-                                        <p class="form_label">Text Only</p>
-                                    </div>
-                                </div>
-                            </fieldset>
-                            <div class="form_element">
-                                <div class="form_label">
-                                    Max characters for intro text :
-                                    <div class="form_sublabel">(Leave empty to keep entire intro text)</div>
-                                </div>
-                                <div class="normal_wrapper">
-                                    <input name="max_chars" id="max_chars" class="listbox numeric" type="text">
-                                </div>
-                            </div>
                             <div id="img_options">
                                 <div class="form_element">
                                     <div class="form_label">
