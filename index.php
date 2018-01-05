@@ -44,7 +44,12 @@ if ($_POST['action'] != 'Export') {
 
             case "wordpress":
                 $content_type = "posts";
-                $messages->addError("WordPress detected but it is not implemented yet!");
+                if ($_POST['action'] == 'Export') {
+                    $max_chars = (int)$_POST['max_chars'];
+                    $export_type = $_POST['export_type'];
+                    require_once($cms . ".php");
+                    export($cms);
+                }
                 break;
 
             default:

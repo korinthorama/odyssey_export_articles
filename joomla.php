@@ -174,7 +174,6 @@ function extract_data($html, $external_images) {
                     $href = "http://odyssey.cms?category=" . urlencode($category_name);
                     $node->setAttribute("href", $href);
                 }
-                continue;
             }
             if (preg_match('/^index.php\?option=com_content&view=article&id=/', $href)) { // set article link
                 parse_str($href, $href_data);
@@ -184,10 +183,9 @@ function extract_data($html, $external_images) {
                     $href = "http://odyssey.cms?article=" . urlencode($article_name);
                     $node->setAttribute("href", $href);
                 }
-                continue;
             }
             if (preg_match('/^images\//', $href)) { // its other file for mediabank
-                $img_id = uniqid() . mt_rand(1000, 10000);
+                $img_id = uniqid();
                 $images[] = array(
                     'src' => $href,
                     'type' => 'file',
@@ -197,7 +195,6 @@ function extract_data($html, $external_images) {
                     'img_id' => $img_id
                 );
                 $node->setAttribute("href", "http://odyssey.cms?file=" . $img_id);
-                continue;
             }
         }else{ // scan for video links
             if (preg_match('/youtube\.com\/watch\?v=([^\&\?\/]+)/', $href, $result) ||
@@ -210,7 +207,6 @@ function extract_data($html, $external_images) {
                     $href = "http://odyssey.cms?video=" . $provider . "videocode" . urlencode($videoCode);
                     $node->setAttribute("href", $href);
                 }
-                continue;
             }
             if (preg_match('/vimeo\.com/', $href)) {
                 list($videoCode, $null) = explode("?", $href);
@@ -222,7 +218,6 @@ function extract_data($html, $external_images) {
                     $href = "http://odyssey.cms?video=" . $provider . "videocode" . urlencode($videoCode);
                     $node->setAttribute("href", $href);
                 }
-                continue;
             }
             if (preg_match('/dailymotion\.com/', $href) || preg_match('/dai\.ly/', $href)) {
                 list($videoCode,) = explode("?", $href);
@@ -234,7 +229,6 @@ function extract_data($html, $external_images) {
                     $href = "http://odyssey.cms?video=" . $provider . "videocode" . urlencode($videoCode);
                     $node->setAttribute("href", $href);
                 }
-                continue;
             }
         }
     }
@@ -253,7 +247,6 @@ function extract_data($html, $external_images) {
                 'img_id' => $img_id
             );
             $node->setAttribute("src", "http://odyssey.cms?image=" . $img_id);
-            continue;
         }
     }
     global $export_type, $default_image_type;
