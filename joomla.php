@@ -185,7 +185,7 @@ function extract_data($html, $external_images) {
                 }
             }
             if (preg_match('/^images\//', $href)) { // its other file for mediabank
-                $img_id = uniqid();
+                $img_id = uniqid() . mt_rand(1000, 10000);
                 $images[] = array(
                     'src' => $href,
                     'type' => 'file',
@@ -237,7 +237,7 @@ function extract_data($html, $external_images) {
         $node = $tags->item($key);
         $src = $node->getAttribute('src');
         if (!preg_match('/^http/', $src)) { // its a local image
-            $img_id = uniqid();
+            $img_id = uniqid() . mt_rand(1000, 10000);
             $images[] = array(
                 'src' => $src,
                 'type' => 'body_image',

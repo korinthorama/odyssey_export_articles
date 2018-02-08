@@ -138,7 +138,7 @@ function extract_data($html, $image) {
     global $export_type;
     $images = $files_added = $ids_added = array();
     if ($export_type == "full" && !empty($image['image_url'])) { // include default image
-        $img_id = uniqid();
+        $img_id = uniqid() . mt_rand(1000, 10000);
         $files_added[] = $image['image_url'];
         $ids_added[] = $img_id;
         $images[] = array(
@@ -197,7 +197,7 @@ function extract_data($html, $image) {
                 $title = ($node->textContent == $href) ? $file_name : $node->textContent;
                 $index = array_search($file_name, $files_added);
                 if(!$index){
-                    $img_id = uniqid();
+                    $img_id = uniqid() . mt_rand(1000, 10000);
                     $files_added[] = $file_name;
                     $ids_added[] = $img_id;
                     $images[] = array(
@@ -219,7 +219,7 @@ function extract_data($html, $image) {
                 $index = array_search($href, $files_added);
                 $title = ($node->textContent == $href) ? basename($href) : $node->textContent;
                 if(!$index){
-                    $img_id = uniqid();
+                    $img_id = uniqid() . mt_rand(1000, 10000);
                     $files_added[] = $href;
                     $ids_added[] = $img_id;
                     $images[] = array(
