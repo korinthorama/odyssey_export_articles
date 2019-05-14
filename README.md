@@ -1,4 +1,4 @@
-# Export Joomla content to Odyssey CMS  
+# Export WordPress or Joomla content to Odyssey CMS  
 
 This application will atempt to export the content of a WordPress or Joomla CMS, in a valid format for importing to Odyssey CMS
 
